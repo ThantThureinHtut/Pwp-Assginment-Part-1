@@ -1,5 +1,9 @@
 import Auth.signup , Auth.login as Auth
 import Role.manager as RoleManager
+import Role.Receptionist as RoleReceptionist
+import Role.Accountant as RoleAccountant
+import Role.Housekeeping as RoleHousekeeping
+import Role.Guest as RoleGuest
 
 AuthStatus = False
 while not AuthStatus:
@@ -20,13 +24,13 @@ while AuthStatus:
     if role_choice == '1':
        RoleManager.manager()
     elif role_choice == '2':      
-        print("Welcome Receptionist!")
+        RoleReceptionist.receptionist()
     elif role_choice == '3':
-        print("Welcome Accountant!")
+        RoleAccountant.accountant()
     elif role_choice == '4':
-        print("Welcome Housekeeping!")
+        RoleHousekeeping.housekeeping()
     elif role_choice == '5':
-        print("Welcome Guest!")
+        RoleGuest.guest_menu()
     elif role_choice == '6':
         print("Exiting the system. Goodbye!")
         break

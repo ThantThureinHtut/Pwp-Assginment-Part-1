@@ -110,7 +110,7 @@ def create_booking():
     
     # Verify guest exists
     guest_exists = False
-    database = open("guest.txt", "r")
+    database = open("database/guest.txt", "r")
     guests = database.readlines()
     database.close()
     
@@ -142,7 +142,7 @@ def create_booking():
     room_available = False
     room_price = 0
     
-    database = open("rooms.txt", "r")
+    database = open("database/rooms.txt", "r")
     rooms = database.readlines()
     database.close()
     
@@ -167,7 +167,7 @@ def create_booking():
     booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
     
     # Append to bookings.txt
-    database = open("bookings.txt", "a")
+    database = open("database/bookings.txt", "a")
     database.write(booking_record)
     database.close()
     
@@ -185,7 +185,7 @@ def check_in():
     
     booking_id = input("Enter Booking ID: ")
     
-    database = open("bookings.txt", "r")
+    database = open("database/bookings.txt", "r")
     bookings = database.readlines()
     database.close()
     

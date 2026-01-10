@@ -1,5 +1,5 @@
-101,Single,Rm150,Available
-102,Single,Rm150,Available
-201,Double,Rm250,Available
-202,Double,Rm250,Available
-301,Suite,Rm500,Available
+101,Single,150,Available
+102,Single,150,Available
+201,Double,250,Available
+202,Double,250,Available
+301,Suite,500,Available

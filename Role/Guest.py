@@ -5,7 +5,7 @@ def view_available_rooms():
     print("\n===== AVAILABLE ROOMS =====")
     
     # Read rooms from file
-    database = open("rooms.txt", "r")
+    database = open("database/rooms.txt", "r")
     rooms = database.readlines()
     database.close()
     
@@ -43,7 +43,7 @@ def make_reservation(guest_id):
     room_available = False
     room_price = 0
     
-    database = open("rooms.txt", "r")
+    database = open("database/rooms.txt", "r")
     rooms = database.readlines()
     database.close()
     
@@ -68,7 +68,7 @@ def make_reservation(guest_id):
     booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
     
     # Append to bookings.txt
-    database = open("bookings.txt", "a")
+    database = open("database/bookings.txt", "a")
     database.write(booking_record)
     database.close()
     
@@ -87,7 +87,7 @@ def cancel_reservation(guest_id):
     booking_id = input("Enter booking ID to cancel: ")
     
     # Read all bookings
-    database = open("bookings.txt", "r")
+    database = open("database/bookings.txt", "r")
     bookings = database.readlines()
     database.close()
     
@@ -120,7 +120,7 @@ def cancel_reservation(guest_id):
         return
     
     # Write updated bookings back to file
-    database = open("bookings.txt", "w")
+    database = open("database/bookings.txt", "w")
     database.writelines(updated_bookings)
     database.close()
     
@@ -134,7 +134,7 @@ def view_billing_summary(guest_id):
     """View billing summary and payment history"""
     print("\n===== BILLING SUMMARY =====")
     
-    database = open("bookings.txt", "r")
+    database = open("database/bookings.txt", "r")
     bookings = database.readlines()
     database.close()
     
@@ -179,7 +179,7 @@ def view_billing_summary(guest_id):
 
 def generate_booking_id():
     """Generate a unique booking ID"""
-    database = open("bookings.txt", "r")
+    database = open("database/bookings.txt", "r")
     bookings = database.readlines()
     database.close()
     
@@ -198,7 +198,7 @@ def generate_booking_id():
 
 def update_room_status(room_number, new_status):
     """Update room status in rooms.txt"""
-    database = open("rooms.txt", "r")
+    database = open("database/rooms.txt", "r")
     rooms = database.readlines()
     database.close()
     
@@ -225,7 +225,7 @@ def guest_menu():
     print("="*50)
     
     # Login or get guest ID
-    guest_id = input("\nEnter your Guest ID: ")
+    guest_id = str(input("\nEnter your Guest ID: "))
     
     while True:
         print("\n===== GUEST MENU =====")
@@ -252,5 +252,3 @@ def guest_menu():
             print("Invalid choice! Please enter 1-5.")
 
 
-# Run the guest menu
-guest_menu()
