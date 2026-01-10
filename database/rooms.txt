@@ -1,1 +1,5 @@
-101:Single:RM 500
+101,Single,Rm150,Available
+102,Single,Rm150,Available
+201,Double,Rm250,Available
+202,Double,Rm250,Available
+301,Suite,Rm500,Available
