@@ -1,36 +1,33 @@
+# Guest.py - Guest role implementation for HRMS
 
 def view_available_rooms():
     """Display all available rooms"""
     print("\n===== AVAILABLE ROOMS =====")
     
-    try:
-        # Read rooms from file
-        with open("rooms.txt", "r") as file:
-            rooms = file.readlines()
+    # Read rooms from file
+    database = open("rooms.txt", "r")
+    rooms = database.readlines()
+    database.close()
+    
+    available_count = 0
+    for room in rooms:
+        # Split room data by comma
+        room_data = room.strip().split(",")
         
-        available_count = 0
-        for room in rooms:
-            # Split room data by comma
-            room_data = room.strip().split(",")
-            
-            if len(room_data) >= 4:
-                room_number = room_data[0]
-                room_type = room_data[1]
-                price = room_data[2]
-                status = room_data[3]
-                
-                # Only show available rooms
-                if status == "Available":
-                    print(f"Room {room_number} | Type: {room_type} | Price: RM{price} | Status: {status}")
-                    available_count += 1
+        room_number = room_data[0]
+        room_type = room_data[1]
+        price = room_data[2]
+        status = room_data[3]
         
-        if available_count == 0:
-            print("No rooms available at the moment.")
-        else:
-            print(f"\nTotal available rooms: {available_count}")
-            
-    except FileNotFoundError:
-        print("Error: rooms.txt file not found!")
+        # Only show available rooms
+        if status == "Available":
+            print(f"Room {room_number} | Type: {room_type} | Price: RM{price}")
+            available_count = available_count + 1
+    
+    if available_count == 0:
+        print("No rooms available at the moment.")
+    else:
+        print(f"\nTotal available rooms: {available_count}")
 
 
 def make_reservation(guest_id):
@@ -46,43 +43,41 @@ def make_reservation(guest_id):
     room_available = False
     room_price = 0
     
-    try:
-        with open("rooms.txt", "r") as file:
-            rooms = file.readlines()
-        
-        for room in rooms:
-            room_data = room.strip().split(",")
-            if room_data[0] == room_number and room_data[3] == "Available":
-                room_available = True
-                room_price = float(room_data[2])
-                break
-        
-        if not room_available:
-            print("Sorry, this room is not available.")
-            return
-        
-        # Generate booking ID
-        booking_id = generate_booking_id()
-        
-        # Calculate total amount (simple calculation)
-        total_amount = room_price
-        
-        # Create booking record
-        booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
-        
-        # Append to bookings.txt
-        with open("bookings.txt", "a") as file:
-            file.write(booking_record)
-        
-        # Update room status to Reserved
-        update_room_status(room_number, "Reserved")
-        
-        print(f"\nReservation successful!")
-        print(f"Booking ID: {booking_id}")
-        print(f"Total Amount: RM{total_amount}")
-        
-    except FileNotFoundError:
-        print("Error: Required files not found!")
+    database = open("rooms.txt", "r")
+    rooms = database.readlines()
+    database.close()
+    
+    for room in rooms:
+        room_data = room.strip().split(",")
+        if room_data[0] == room_number and room_data[3] == "Available":
+            room_available = True
+            room_price = float(room_data[2])
+            break
+    
+    if room_available == False:
+        print("Sorry, this room is not available.")
+        return
+    
+    # Generate booking ID
+    booking_id = generate_booking_id()
+    
+    # Calculate total amount
+    total_amount = room_price
+    
+    # Create booking record
+    booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
+    
+    # Append to bookings.txt
+    database = open("bookings.txt", "a")
+    database.write(booking_record)
+    database.close()
+    
+    # Update room status to Reserved
+    update_room_status(room_number, "Reserved")
+    
+    print(f"\nReservation successful!")
+    print(f"Booking ID: {booking_id}")
+    print(f"Total Amount: RM{total_amount}")
 
 
 def cancel_reservation(guest_id):
@@ -91,143 +86,136 @@ def cancel_reservation(guest_id):
     
     booking_id = input("Enter booking ID to cancel: ")
     
-    try:
-        # Read all bookings
-        with open("bookings.txt", "r") as file:
-            bookings = file.readlines()
+    # Read all bookings
+    database = open("bookings.txt", "r")
+    bookings = database.readlines()
+    database.close()
+    
+    booking_found = False
+    updated_bookings = []
+    room_to_free = ""
+    
+    for booking in bookings:
+        booking_data = booking.strip().split(",")
         
-        booking_found = False
-        updated_bookings = []
-        room_to_free = ""
-        
-        for booking in bookings:
-            booking_data = booking.strip().split(",")
+        # Check if this is the booking to cancel
+        if booking_data[0] == booking_id and booking_data[1] == guest_id:
+            booking_found = True
             
-            # Check if this is the booking to cancel
-            if booking_data[0] == booking_id and booking_data[1] == guest_id:
-                booking_found = True
-                
-                # Check if already cancelled
-                if booking_data[5] == "Cancelled":
-                    print("This booking is already cancelled.")
-                    return
-                
-                # Update status to Cancelled
-                booking_data[5] = "Cancelled"
-                room_to_free = booking_data[2]
-                updated_bookings.append(",".join(booking_data) + "\n")
-            else:
-                updated_bookings.append(booking)
-        
-        if not booking_found:
-            print("Booking not found or you don't have permission to cancel it.")
-            return
-        
-        # Write updated bookings back to file
-        with open("bookings.txt", "w") as file:
-            file.writelines(updated_bookings)
-        
-        # Free up the room
-        update_room_status(room_to_free, "Available")
-        
-        print("Reservation cancelled successfully!")
-        
-    except FileNotFoundError:
-        print("Error: bookings.txt file not found!")
+            # Check if already cancelled
+            if booking_data[5] == "Cancelled":
+                print("This booking is already cancelled.")
+                return
+            
+            # Update status to Cancelled
+            booking_data[5] = "Cancelled"
+            room_to_free = booking_data[2]
+            updated_line = ",".join(booking_data) + "\n"
+            updated_bookings.append(updated_line)
+        else:
+            updated_bookings.append(booking)
+    
+    if booking_found == False:
+        print("Booking not found or you don't have permission to cancel it.")
+        return
+    
+    # Write updated bookings back to file
+    database = open("bookings.txt", "w")
+    database.writelines(updated_bookings)
+    database.close()
+    
+    # Free up the room
+    update_room_status(room_to_free, "Available")
+    
+    print("Reservation cancelled successfully!")
 
 
 def view_billing_summary(guest_id):
     """View billing summary and payment history"""
     print("\n===== BILLING SUMMARY =====")
     
-    try:
-        with open("bookings.txt", "r") as file:
-            bookings = file.readlines()
+    database = open("bookings.txt", "r")
+    bookings = database.readlines()
+    database.close()
+    
+    total_amount = 0
+    paid_amount = 0
+    outstanding_amount = 0
+    guest_bookings = []
+    
+    # Find all bookings for this guest
+    for booking in bookings:
+        booking_data = booking.strip().split(",")
         
-        total_amount = 0
-        paid_amount = 0
-        outstanding_amount = 0
-        guest_bookings = []
-        
-        # Find all bookings for this guest
-        for booking in bookings:
-            booking_data = booking.strip().split(",")
+        if booking_data[1] == guest_id:
+            guest_bookings.append(booking_data)
+            amount = float(booking_data[6])
+            total_amount = total_amount + amount
             
-            if booking_data[1] == guest_id:
-                guest_bookings.append(booking_data)
-                amount = float(booking_data[6])
-                total_amount += amount
-                
-                # Check payment status
-                if booking_data[7] == "Paid":
-                    paid_amount += amount
-                else:
-                    outstanding_amount += amount
-        
-        if len(guest_bookings) == 0:
-            print("No bookings found for your account.")
-            return
-        
-        # Display summary
-        print(f"Total Amount: RM{total_amount:.2f}")
-        print(f"Paid Amount: RM{paid_amount:.2f}")
-        print(f"Outstanding: RM{outstanding_amount:.2f}")
-        
-        print("\n===== PAYMENT HISTORY =====")
-        for booking in guest_bookings:
-            print(f"Booking ID: {booking[0]}")
-            print(f"Room: {booking[2]}")
-            print(f"Check-in: {booking[3]} | Check-out: {booking[4]}")
-            print(f"Status: {booking[5]}")
-            print(f"Amount: RM{booking[6]} | Payment: {booking[7]}")
-            print("-" * 50)
-        
-    except FileNotFoundError:
-        print("Error: bookings.txt file not found!")
+            # Check payment status
+            if booking_data[7] == "Paid":
+                paid_amount = paid_amount + amount
+            else:
+                outstanding_amount = outstanding_amount + amount
+    
+    if len(guest_bookings) == 0:
+        print("No bookings found for your account.")
+        return
+    
+    # Display summary
+    print(f"Total Amount: RM{total_amount:.2f}")
+    print(f"Paid Amount: RM{paid_amount:.2f}")
+    print(f"Outstanding: RM{outstanding_amount:.2f}")
+    
+    print("\n===== PAYMENT HISTORY =====")
+    for booking in guest_bookings:
+        print(f"Booking ID: {booking[0]}")
+        print(f"Room: {booking[2]}")
+        print(f"Check-in: {booking[3]} | Check-out: {booking[4]}")
+        print(f"Status: {booking[5]}")
+        print(f"Amount: RM{booking[6]} | Payment: {booking[7]}")
+        print("-" * 50)
 
 
 def generate_booking_id():
     """Generate a unique booking ID"""
-    try:
-        with open("bookings.txt", "r") as file:
-            bookings = file.readlines()
-        
-        if len(bookings) == 0:
-            return "B001"
-        
-        # Get last booking ID
-        last_booking = bookings[-1].strip().split(",")
-        last_id = last_booking[0]
-        
-        # Extract number and increment
-        id_number = int(last_id[1:]) + 1
-        return f"B{id_number:03d}"
-        
-    except FileNotFoundError:
+    database = open("bookings.txt", "r")
+    bookings = database.readlines()
+    database.close()
+    
+    if len(bookings) == 0:
         return "B001"
+    
+    # Get last booking ID
+    last_booking = bookings[-1].strip().split(",")
+    last_id = last_booking[0]
+    
+    # Extract number and increment
+    id_number = int(last_id[1:]) + 1
+    new_id = "B" + str(id_number).zfill(3)
+    return new_id
 
 
 def update_room_status(room_number, new_status):
     """Update room status in rooms.txt"""
-    try:
-        with open("rooms.txt", "r") as file:
-            rooms = file.readlines()
+    database = open("rooms.txt", "r")
+    rooms = database.readlines()
+    database.close()
+    
+    updated_rooms = []
+    for room in rooms:
+        room_data = room.strip().split(",")
         
-        updated_rooms = []
-        for room in rooms:
-            room_data = room.strip().split(",")
-            
-            if room_data[0] == room_number:
-                room_data[3] = new_status
-                updated_rooms.append(",".join(room_data) + "\n")
-            else:
-                updated_rooms.append(room)
-        
-        with open("rooms.txt", "w") as file:
-            file.writelines(updated_rooms)
-            
-    except FileNotFoundError:
-        print("Error: rooms.txt file not found!")
+        if room_data[0] == room_number:
+            room_data[3] = new_status
+            updated_line = ",".join(room_data) + "\n"
+            updated_rooms.append(updated_line)
+        else:
+            updated_rooms.append(room)
+    
+    database = open("rooms.txt", "w")
+    database.writelines(updated_rooms)
+    database.close()
 
 
 def guest_menu():
@@ -241,11 +229,11 @@ def guest_menu():
     
     while True:
         print("\n===== GUEST MENU =====")
-        print("1. View Available Rooms")
-        print("2. Make Reservation")
-        print("3. Cancel Reservation")
-        print("4. View Billing Summary")
-        print("5. Exit")
+        print("(1) View Available Rooms")
+        print("(2) Make Reservation")
+        print("(3) Cancel Reservation")
+        print("(4) View Billing Summary")
+        print("(5) Exit")
         
         choice = input("\nEnter your choice (1-5): ")
         
@@ -265,5 +253,4 @@ def guest_menu():
 
 
 # Run the guest menu
-if __name__ == "__main__":
-    guest_menu()
+guest_menu()
