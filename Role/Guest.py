@@ -206,17 +206,20 @@ def generate_booking_id():
     bookings = database.readlines()
     database.close()
 
-    if len(bookings) == 0:
-        return "B001"
+    for booking in reversed(bookings):
+        clean_line = booking.strip()
+        if clean_line == "":
+            continue
+        last_id = clean_line.split(",")[0]
+        if len(last_id) < 2 or last_id[0] != "B":
+            continue
+        id_number_part = last_id[1:]
+        if id_number_part.isdigit() == False:
+            continue
+        id_number = int(id_number_part) + 1
+        return "B" + str(id_number).zfill(3)
 
-    # Get last booking ID
-    last_booking = bookings[-1].strip().split(",")
-    last_id = last_booking[0]
-
-    # Extract number and increment
-    id_number = int(last_id[1:]) + 1
-    new_id = "B" + str(id_number).zfill(3)
-    return new_id
+    return "B001"
 
 
 def update_room_status(room_number, new_status):
@@ -274,6 +277,3 @@ def guest_menu():
         else:
             print("Invalid choice! Please enter 1-5.")
 
-
-# Run the guest menu
-guest_menu()

@@ -11,7 +11,7 @@ def register_guest():
     id_number = input("Enter ID number: ")
     
     # Check if guest already exists
-    database = open("guest.txt", "r")
+    database = open("database/guest.txt", "r")
     guests = database.readlines()
     database.close()
     
@@ -28,7 +28,7 @@ def register_guest():
     guest_record = f"{guest_id},{name},{email},{phone},{id_number}\n"
     
     # Append to guest.txt
-    database = open("guest.txt", "a")
+    database = open("database/guest.txt", "a")
     database.write(guest_record)
     database.close()
     
@@ -44,7 +44,7 @@ def update_guest_info():
     
     guest_id = input("Enter Guest ID: ")
     
-    database = open("guest.txt", "r")
+    database = open("database/guest.txt", "r")
     guests = database.readlines()
     database.close()
     
@@ -96,7 +96,7 @@ def update_guest_info():
         return
     
     # Write updated data back to file
-    database = open("guest.txt", "w")
+    database = open("database/guest.txt", "w")
     database.writelines(updated_guests)
     database.close()
 
@@ -192,6 +192,7 @@ def check_in():
     booking_found = False
     updated_bookings = []
     room_number = ""
+    status_updated = False
     
     for booking in bookings:
         booking_data = booking.strip().split(",")
@@ -202,3 +203,184 @@ def check_in():
             if booking_data[5] != "Confirmed":
                 print(f"Cannot check-in. Booking status is {booking_data[5]}.")
                 updated_bookings.append(booking)
+                continue
+
+            booking_data[5] = "Checked-In"
+            room_number = booking_data[2]
+            updated_line = ",".join(booking_data) + "\n"
+            updated_bookings.append(updated_line)
+            status_updated = True
+        else:
+            updated_bookings.append(booking)
+
+    if booking_found == False:
+        print("Booking not found!")
+        return
+
+    if status_updated == False:
+        return
+
+    database = open("database/bookings.txt", "w")
+    database.writelines(updated_bookings)
+    database.close()
+
+    update_room_status(room_number, "Occupied")
+    print("Check-in successful!")
+
+
+def check_out():
+    """Check out a guest"""
+    print("\n===== CHECK-OUT =====")
+
+    booking_id = input("Enter Booking ID: ")
+
+    database = open("database/bookings.txt", "r")
+    bookings = database.readlines()
+    database.close()
+
+    booking_found = False
+    updated_bookings = []
+    room_number = ""
+    status_updated = False
+
+    for booking in bookings:
+        booking_data = booking.strip().split(",")
+
+        if booking_data[0] == booking_id:
+            booking_found = True
+
+            if booking_data[5] != "Checked-In":
+                print(f"Cannot check-out. Booking status is {booking_data[5]}.")
+                updated_bookings.append(booking)
+                continue
+
+            booking_data[5] = "Checked-Out"
+            room_number = booking_data[2]
+            updated_line = ",".join(booking_data) + "\n"
+            updated_bookings.append(updated_line)
+            status_updated = True
+        else:
+            updated_bookings.append(booking)
+
+    if booking_found == False:
+        print("Booking not found!")
+        return
+
+    if status_updated == False:
+        return
+
+    database = open("database/bookings.txt", "w")
+    database.writelines(updated_bookings)
+    database.close()
+
+    update_room_status(room_number, "Dirty")
+    print("Check-out successful! Room marked as Dirty.")
+
+
+def auto_assign_room():
+    """Auto-assign an available room"""
+    database = open("database/rooms.txt", "r")
+    rooms = database.readlines()
+    database.close()
+
+    for room in rooms:
+        room_data = room.strip().split(",")
+        if room_data[3] == "Available":
+            return room_data[0]
+
+    return ""
+
+
+def generate_booking_id():
+    """Generate a unique booking ID"""
+    database = open("database/bookings.txt", "r")
+    bookings = database.readlines()
+    database.close()
+
+    for booking in reversed(bookings):
+        clean_line = booking.strip()
+        if clean_line == "":
+            continue
+        last_id = clean_line.split(",")[0]
+        if len(last_id) < 2 or last_id[0] != "B":
+            continue
+        id_number_part = last_id[1:]
+        if id_number_part.isdigit() == False:
+            continue
+        id_number = int(id_number_part) + 1
+        return "B" + str(id_number).zfill(3)
+
+    return "B001"
+
+
+def generate_guest_id():
+    """Generate a unique guest ID"""
+    database = open("database/guest.txt", "r")
+    guests = database.readlines()
+    database.close()
+
+    if len(guests) == 0:
+        return "G001"
+
+    last_guest = guests[-1].strip().split(",")
+    last_id = last_guest[0]
+
+    id_number = int(last_id[1:]) + 1
+    new_id = "G" + str(id_number).zfill(3)
+    return new_id
+
+
+def update_room_status(room_number, new_status):
+    """Update room status in rooms.txt"""
+    database = open("database/rooms.txt", "r")
+    rooms = database.readlines()
+    database.close()
+
+    updated_rooms = []
+    for room in rooms:
+        room_data = room.strip().split(",")
+
+        if room_data[0] == room_number:
+            room_data[3] = new_status
+            updated_line = ",".join(room_data) + "\n"
+            updated_rooms.append(updated_line)
+        else:
+            updated_rooms.append(room)
+
+    database = open("database/rooms.txt", "w")
+    database.writelines(updated_rooms)
+    database.close()
+
+
+def receptionist():
+    """Display receptionist menu and handle user choices"""
+    print("\n" + "=" * 50)
+    print("WELCOME TO LOLA HOTEL - RECEPTIONIST PORTAL")
+    print("=" * 50)
+
+    while True:
+        print("\n===== RECEPTIONIST MENU =====")
+        print("(1) Register Guest")
+        print("(2) Update Guest Information")
+        print("(3) Create Booking")
+        print("(4) Check-In Guest")
+        print("(5) Check-Out Guest")
+        print("(6) Exit")
+
+        choice = input("\nEnter your choice (1-6): ")
+
+        if choice == "1":
+            register_guest()
+        elif choice == "2":
+            update_guest_info()
+        elif choice == "3":
+            create_booking()
+        elif choice == "4":
+            check_in()
+        elif choice == "5":
+            check_out()
+        elif choice == "6":
+            print("\nExiting receptionist portal.")
+            break
+        else:
+            print("Invalid choice! Please enter 1-6.")

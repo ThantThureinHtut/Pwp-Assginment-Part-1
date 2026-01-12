@@ -1,5 +1,5 @@
 def login():
-    name = str(input("Enter your name: "))
+    name =  str(input("Enter your name: ")).lower();
     password = str(input("Enter your password: "))
     database = open("database/auth.txt", "r")
     data = database.readlines();
