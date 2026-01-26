@@ -16,7 +16,7 @@ def register_guest():
     database.close()
     
     for guest in guests:
-        guest_data = guest.strip().split(",")
+        guest_data = guest.strip().split(":")
         if guest_data[2] == email or guest_data[4] == id_number:
             print(f"Guest already registered with ID: {guest_data[0]}")
             return guest_data[0]
@@ -25,7 +25,7 @@ def register_guest():
     guest_id = generate_guest_id()
     
     # Create guest record
-    guest_record = f"{guest_id},{name},{email},{phone},{id_number}\n"
+    guest_record = f"{guest_id}:{name}:{email}:{phone}:{id_number}\n"
     
     # Append to guest.txt
     database = open("database/guest.txt", "a")
@@ -52,7 +52,7 @@ def update_guest_info():
     updated_guests = []
     
     for guest in guests:
-        guest_data = guest.strip().split(",")
+        guest_data = guest.strip().split(":")
         
         if guest_data[0] == guest_id:
             guest_found = True
@@ -85,7 +85,7 @@ def update_guest_info():
                 print("Invalid choice!")
                 return
             
-            updated_line = ",".join(guest_data) + "\n"
+            updated_line = ":".join(guest_data) + "\n"
             updated_guests.append(updated_line)
             print("Guest information updated successfully!")
         else:
@@ -106,8 +106,8 @@ def create_booking():
     print("\n===== CREATE BOOKING =====")
     
     # Get booking details
-    guest_id = input("Enter Guest ID: ")
-    
+    guest_id = str(input("Enter Guest ID: "))
+    print(guest_id)
     # Verify guest exists
     guest_exists = False
     database = open("database/guest.txt", "r")
@@ -119,7 +119,7 @@ def create_booking():
             guest_exists = True
             break
     
-    if guest_exists == False:
+    if guest_exists == False or guest_id.strip() == '':
         print("Guest not found! Please register the guest first.")
         return
     
@@ -147,7 +147,7 @@ def create_booking():
     database.close()
     
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
         if room_data[0] == room_number and room_data[3] == "Available":
             room_available = True
             room_price = float(room_data[2])
@@ -164,7 +164,7 @@ def create_booking():
     total_amount = room_price
     
     # Create booking record
-    booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
+    booking_record = f"{booking_id}:{guest_id}:{room_number}:{check_in_date}:{check_out_date}:Confirmed:{total_amount}:Pending\n"
     
     # Append to bookings.txt
     database = open("database/bookings.txt", "a")
@@ -195,7 +195,7 @@ def check_in():
     status_updated = False
     
     for booking in bookings:
-        booking_data = booking.strip().split(",")
+        booking_data = booking.strip().split(":")
         
         if booking_data[0] == booking_id:
             booking_found = True
@@ -207,7 +207,7 @@ def check_in():
 
             booking_data[5] = "Checked-In"
             room_number = booking_data[2]
-            updated_line = ",".join(booking_data) + "\n"
+            updated_line = ":".join(booking_data) + "\n"
             updated_bookings.append(updated_line)
             status_updated = True
         else:
@@ -244,7 +244,7 @@ def check_out():
     status_updated = False
 
     for booking in bookings:
-        booking_data = booking.strip().split(",")
+        booking_data = booking.strip().split(":")
 
         if booking_data[0] == booking_id:
             booking_found = True
@@ -256,7 +256,7 @@ def check_out():
 
             booking_data[5] = "Checked-Out"
             room_number = booking_data[2]
-            updated_line = ",".join(booking_data) + "\n"
+            updated_line = ":".join(booking_data) + "\n"
             updated_bookings.append(updated_line)
             status_updated = True
         else:
@@ -284,7 +284,8 @@ def auto_assign_room():
     database.close()
 
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
+        print(room_data)
         if room_data[3] == "Available":
             return room_data[0]
 
@@ -301,7 +302,7 @@ def generate_booking_id():
         clean_line = booking.strip()
         if clean_line == "":
             continue
-        last_id = clean_line.split(",")[0]
+        last_id = clean_line.split(":")[0]
         if len(last_id) < 2 or last_id[0] != "B":
             continue
         id_number_part = last_id[1:]
@@ -322,7 +323,7 @@ def generate_guest_id():
     if len(guests) == 0:
         return "G001"
 
-    last_guest = guests[-1].strip().split(",")
+    last_guest = guests[-1].strip().split(":")
     last_id = last_guest[0]
 
     id_number = int(last_id[1:]) + 1
@@ -338,11 +339,11 @@ def update_room_status(room_number, new_status):
 
     updated_rooms = []
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
 
         if room_data[0] == room_number:
             room_data[3] = new_status
-            updated_line = ",".join(room_data) + "\n"
+            updated_line = ":".join(room_data) + "\n"
             updated_rooms.append(updated_line)
         else:
             updated_rooms.append(room)
@@ -384,3 +385,4 @@ def receptionist():
             break
         else:
             print("Invalid choice! Please enter 1-6.")
+

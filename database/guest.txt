@@ -1,2 +1,2 @@
-G001,John Doe,john@email.com,0123456789,IC123456
-G002,Jack,emailacasdc,20t204t,156
+G001:John:ddd@gmail.com:012366427:mi2462
+G002:John Doe:john@gmail.com:024247567:246fdh3

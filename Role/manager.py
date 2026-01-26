@@ -10,8 +10,9 @@ def room_add():
     room_type = input("Enter Room Type: ")
     price = input("Enter Price RM: ")
     database = open("database/rooms.txt", "a")
-    database.write(f"{room_id}:{room_type}:RM {price}\n")
+    database.write(f"{room_id}:{room_type}:{price}:Available\n")
     database.close()
+
 def room_update():
     print("Updating room details...")
     # Display current rooms
@@ -24,31 +25,31 @@ def room_update():
     print("---------------------")
 
     # Get Room ID to update
-    database = open("database/rooms.txt", "a")
     room_id = input("Enter Room ID to update: ")
     new_lines = []
+    found = False
     for line in lines:
         parts = line.strip().split(":")
         # Update the room details if Room ID matches
         if parts[0] == room_id:
+            found = True
             new_room_type = input("Enter new Room Type: ")
             new_price = input("Enter new Price RM: ")
-            new_lines.append(f"{room_id}:{new_room_type}:RM {new_price}\n")
+            # Keep the status if it exists, otherwise set to Available
+            status = parts[3] if len(parts) > 3 else "Available"
+            new_lines.append(f"{room_id}:{new_room_type}:{new_price}:{status}\n")
         else:
             # Keep the line unchanged if Room ID does not match
-            print("Room ID not found. No changes made.")
             new_lines.append(line)
-            database = open("database/rooms.txt", "w")
-            database.writelines(new_lines)
-            database.close()
-            break
-            
-            
 
-    # Write updated lines back to the file
-    database = open("database/rooms.txt", "w")
-    database.writelines(new_lines)
-    database.close()
+    if not found:
+        print("Room ID not found. No changes made.")
+    else:
+        # Write updated lines back to the file
+        database = open("database/rooms.txt", "w")
+        database.writelines(new_lines)
+        database.close()
+        print(f"Room ID {room_id} updated successfully.")
 
 def room_delete():
     print("Deleting a room...")
@@ -97,13 +98,13 @@ def monthly_report():
     bookings = database.readlines()
     total_revenue = 0
     for booking in bookings:
-        print(booking.strip())
         parts = booking.strip().split(":")
-        price_part = parts[3]  # Assuming price is the 4th element
+        price_part = parts[6]  # Price is at index 6
         price_value = float(price_part)
         total_revenue += price_value
 
     print(f"Total Revenue for the Month: RM {total_revenue}")
+
 def occupancy_report():
     print("---- Occupancy Report ----")
     # Calculate occupancy rate

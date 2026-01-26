@@ -19,7 +19,7 @@ def view_tasks():
         if len(clean_line) == 0:
             continue
         
-        data = clean_line.split(",") 
+        data = clean_line.split(":") 
 
         # If line is broken/short, skip it
         if len(data) < 4:
@@ -58,7 +58,7 @@ def update_status():
         if len(clean_line) == 0:
             continue
 
-        data = clean_line.split(",")
+        data = clean_line.split(":")
 
         # Skip broken lines but save them back
         if len(data) < 4:
@@ -81,7 +81,7 @@ def update_status():
             print(f"Room {target_id} updated.")
 
         # Rebuild the line
-        new_line = f"{data[0]},{data[1]},{data[2]},{current_status}\n"
+        new_line = f"{data[0]}:{data[1]}:{data[2]}:{current_status}\n"
         new_file_content.append(new_line)
 
     # Write changes back
@@ -96,7 +96,7 @@ def update_status():
 # ==============================================================================
 # MAIN MENU
 # ==============================================================================
-def housekeeping_menu():
+def housekeeping():
     while True:
         print("\n=== HOUSEKEEPING DASHBOARD ===")
         print("1. View Tasks")
@@ -111,6 +111,3 @@ def housekeeping_menu():
         else: print("Invalid input.")
 
 
-def housekeeping():
-    """Entry point for housekeeping role"""
-    housekeeping_menu()

@@ -1,5 +1,1 @@
-101,Single,150,Dirty
-102,Single,150,Available
-201,Double,250,Available
-202,Double,250,Available
-301,Suite,500,Available
+225:Single:300:Available

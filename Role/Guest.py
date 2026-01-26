@@ -12,7 +12,7 @@ def view_available_rooms():
     available_count = 0
     for room in rooms:
         # Split room data by comma
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
 
         room_number = room_data[0]
         room_type = room_data[1]
@@ -57,7 +57,7 @@ def make_reservation(guest_id):
     database.close()
 
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
         if room_data[0] == room_number and room_data[3] == "Available":
             room_available = True
             room_price = float(room_data[2])
@@ -74,7 +74,7 @@ def make_reservation(guest_id):
     total_amount = room_price
 
     # Create booking record
-    booking_record = f"{booking_id},{guest_id},{room_number},{check_in_date},{check_out_date},Confirmed,{total_amount},Pending\n"
+    booking_record = f"{booking_id}:{guest_id}:{room_number}:{check_in_date}:{check_out_date}:Confirmed:{total_amount}:Pending\n"
 
     # Append to bookings.txt
     database = open("database/bookings.txt", "a")
@@ -105,7 +105,7 @@ def cancel_reservation(guest_id):
     room_to_free = ""
 
     for booking in bookings:
-        booking_data = booking.strip().split(",")
+        booking_data = booking.strip().split(":")
 
         # Check if this is the booking to cancel
         if booking_data[0] == booking_id and booking_data[1] == guest_id:
@@ -119,7 +119,7 @@ def cancel_reservation(guest_id):
             # Update status to Cancelled
             booking_data[5] = "Cancelled"
             room_to_free = booking_data[2]
-            updated_line = ",".join(booking_data) + "\n"
+            updated_line = ":".join(booking_data) + "\n"
             updated_bookings.append(updated_line)
         else:
             updated_bookings.append(booking)
@@ -154,7 +154,7 @@ def view_billing_summary(guest_id):
 
     # Find all bookings for this guest
     for booking in bookings:
-        booking_data = booking.strip().split(",")
+        booking_data = booking.strip().split(":")
 
         if booking_data[1] == guest_id:
             guest_bookings.append(booking_data)
@@ -193,7 +193,7 @@ def auto_assign_room():
     database.close()
 
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
         if room_data[3] == "Available":
             return room_data[0]
 
@@ -210,7 +210,7 @@ def generate_booking_id():
         clean_line = booking.strip()
         if clean_line == "":
             continue
-        last_id = clean_line.split(",")[0]
+        last_id = clean_line.split(":")[0]
         if len(last_id) < 2 or last_id[0] != "B":
             continue
         id_number_part = last_id[1:]
@@ -230,11 +230,11 @@ def update_room_status(room_number, new_status):
 
     updated_rooms = []
     for room in rooms:
-        room_data = room.strip().split(",")
+        room_data = room.strip().split(":")
 
         if room_data[0] == room_number:
             room_data[3] = new_status
-            updated_line = ",".join(room_data) + "\n"
+            updated_line = ":".join(room_data) + "\n"
             updated_rooms.append(updated_line)
         else:
             updated_rooms.append(room)

@@ -1,4 +1,5 @@
-import Auth.signup , Auth.login as Auth
+import Auth.login as AuthLogin
+import Auth.signup as AuthSignup
 import Role.manager as RoleManager
 import Role.Receptionist as RoleReceptionist
 import Role.Accountant as RoleAccountant
@@ -11,11 +12,10 @@ while not AuthStatus:
     choice = input("Enter your choice (1 or 2): ")
     if choice == '1':
         print("Redirecting to Login Page...")
-        AuthStatus = Auth.login()
+        AuthStatus = AuthLogin.login()
     elif choice == '2':
         print("Redirecting to Signup Page...")
-        AuthStatus =  Auth.signup();
-
+        AuthStatus =  AuthSignup.signup();
 
 
 while AuthStatus:
